@@ -1,0 +1,32 @@
+﻿@model string
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <style>
+        div {
+            width: 300px;
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <form action="/login/entrar" method="post">
+            <label>Email</label> <input type="text" name="username" value="" /><br />
+            <label>Senha</label> <input type="password" name="senha" value="" /><br />
+            <p><input type="submit" name="enviar" value="Entrar " /></p>
+        </form>
+        @if (!string.IsNullOrEmpty(Model))
+        {
+            <p style="color:red; font-weight:bold;">@Model</p>
+        }
+    </div>
+</body>
+</html>

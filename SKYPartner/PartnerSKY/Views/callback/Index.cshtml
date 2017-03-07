@@ -1,0 +1,28 @@
+﻿@model Boolean
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+</head>
+<body>
+    <div>
+        <h1>Callback</h1>
+
+        @if (Model)
+        { <h3>Sua chave é válida!</h3>}
+        else
+        { <h3 style="color:red">Sua chave não é válida.</h3>}
+
+        <p>
+            <label style="width: 150px; display: block; float: left;">Chave original:</label> @ViewBag.original <br />
+            <label style="width: 150px; display: block; float: left;">Chave reconstruída:</label> @ViewBag.reconstruida
+        </p>
+    </div>
+</body>
+</html>
