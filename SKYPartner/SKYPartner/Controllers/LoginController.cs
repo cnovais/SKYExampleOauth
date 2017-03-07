@@ -67,8 +67,7 @@ namespace SKYPartner.Controllers
             }
             else
             {
-                throw new HttpException(404, "A página que você procura não existe");
-
+                throw new HttpException(404, "The page you are looking for doesn't exist");
             }
         }
 
@@ -124,7 +123,7 @@ namespace SKYPartner.Controllers
         }
 
         /// <summary>
-        /// O processo  começa aqui!
+        /// The process start here
         /// </summary>
         /// <param name="url"></param>
         /// <param name="consumerKey"></param>
@@ -241,9 +240,9 @@ namespace SKYPartner.Controllers
             parameters.Add(new QueryParameter(OAuthSignatureMethodKey, signatureType));
             parameters.Add(new QueryParameter(OAuthConsumerKeyKey, consumerKey));
             parameters.Add(new QueryParameter(OAuthTokenKey, token));
-            parameters.Add(new QueryParameter(OAuthusUsuarioSKY, usuarioSKY.ToString())); // parâmetros adicionais
-            parameters.Add(new QueryParameter(OAuthusUsuarioNome, nome)); // parâmetros adicionais
-            parameters.Add(new QueryParameter(OAuthusUsuarioEmail, email)); // parâmetros adicionais
+            parameters.Add(new QueryParameter(OAuthusUsuarioSKY, usuarioSKY.ToString())); // extras parameters
+            parameters.Add(new QueryParameter(OAuthusUsuarioNome, nome)); // extras parameters
+            parameters.Add(new QueryParameter(OAuthusUsuarioEmail, email)); // extras parameters
 
             parameters.Sort(new QueryParameterComparer());
 
@@ -281,24 +280,23 @@ namespace SKYPartner.Controllers
         {
             var hasheada = ComputeHash(hash, signatureBase);
             return HttpUtility.UrlEncode(hasheada);
-            //return EncodeMaiusculo(encodada);
         }
 
         /// <summary>
-        /// Opcional, apenas para manter um padrão de encodes maiúsculos na URL, caso necessário.
+        /// Optional, Only to keep a pattern of uppercase encodings in the URL, if necessary.
         /// </summary>
         /// <param name="encodada"></param>
         /// <returns></returns>
         private static string EncodeMaiusculo(string encodada)
         {
-            // pra deixar o encoding uppercase
+            //uppercase
             Regex reg = new Regex(@"%[a-f0-9]{2}");
             return reg.Replace(encodada, m => m.Value.ToUpperInvariant());
         }
 
         private string GenerateTimeStamp()
         {
-            // implementação default da hora UNIX da atual UTC
+            // Default UNIX time of the current UTC
             var ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
             return Convert.ToInt64(ts.TotalSeconds).ToString();
         }
