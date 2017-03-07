@@ -48,6 +48,6 @@ For the Provider to redirect the user to the right place a callback url is requi
 ex: ```https://auth.partner.tv/sky/callback```
 
 For the flow of OAuth to work, it is necessary for the user to be logged in SkyOnline and has permission to view the client’s contents. Given these conditions the user may be redirected to access the client’s contents.
-When the user click in watch movie, the Provider will to redirect the url above with the parameters.
+When the user click in watch movie, the Provider will redirect the url above with the parameters.
 
 The Client will to validate the request token and redirect the user for the content
