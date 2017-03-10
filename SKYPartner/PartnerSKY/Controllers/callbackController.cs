@@ -60,13 +60,9 @@ namespace PartnerSKY.Controllers
         public ActionResult Index(string email, string nome, string oauth_consumer_key, string oauth_nonce,
             string oauth_signature_method, string oauth_timestamp, long uid, string oauth_signature)
         {
-            var chavePrivadaQueReconstruiraAAssinatura = "d3cf64a3-9ce9-4683-bd6d-7513cd64f020"; // parametro secret do XML entregue
-            //var chavePrivadaQueReconstruiraAAssinatura = "473010f4-9789-4d46-b5fa-ecaa590c326c"; // telecine
-            
-            var urlCallbackPartner = "http://localhost:60183/callback"; // use o método que quiser para obter este valor. coloquei manualmente apenas para facilitar o entendimento
-        
+            var chavePrivadaQueReconstruiraAAssinatura = "d3cf64a3-9ce9-4683-bd6d-7513cd64f020"; // secret parameter parametro secret do XML entregue           
+            var urlCallbackPartner = "http://localhost:60183/callback"; // You can use any method you want to get the url value
 
-            // Os métodos usados na sequência são auto-exlicativos.
             var assinaturaReconstruida = this.GenerateSignature(new Uri(urlCallbackPartner),
                         oauth_consumer_key,
                         chavePrivadaQueReconstruiraAAssinatura,
@@ -78,36 +74,36 @@ namespace PartnerSKY.Controllers
                         nome,
                         email);
 
-            /// Ao criar o Base64, um sinal de '+' pode ser adicionado (faz parte da especificação), e ao ser encodado 
-            /// para sofrer o redirect, vira %2B (veja http://www.w3schools.com/tags/ref_urlencode.asp).
-            /// No C#, ao usar o UrlDecode, ele primeiro interpreta o %2B como sinal de '+' e na sequência, 
-            /// interpreta o sinal de '+' como espaço em branco (na especificação  do w3schools, url acima, temos essa informação!
-            /// 
-            /// Teste exaustivamente sua implementação para  ter certeza de que fará a comparação correta no caso do sinal de + fazer 
-            /// parte da assinatura.
-            /// Ex.:
-            /// Assinatura encodada na URL: oauth_signature=hSOTxjCJAWs%2BGDUx%2B3tAtdSlMHA%3D (note o %2B);
-            /// Base64 que foi encodado e colocado na URL: hSOTxjCJAWs+GDUx+3tAtdSlMHA= (veja os dois sinais de '+')
-            /// Assinatura desencodada pelo C#: hSOTxjCJAWs GDUx 3tAtdSlMHA= (note os espaços em branco)
-            /// 
-            /// Avalie se a implementação do PHP tem esse comportamento ou não e tome cuidado para não recusar chaves válidas!
-            
+            /// When creating Base64, a '+' sign can be added (it is part of the specification), and when it is encoded as well
+            /// To undergo redirect, turn to% 2B (see http://www.w3schools.com/tags/ref_urlencode.asp).
+            /// In C #, when using UrlDecode, it first interprets% 2B as a '+' sign and in sequence,
+            /// interprets the '+' sign as white space (in the w3schools specification, url above, we have this info!
+            ///
+            /// Test your implementation thoroughly to make sure you will make the correct comparison in case of +
+            /// part of the signature.
+            /// Ex .:
+            /// Signature encoded in URL: oauth_signature = hSOTxjCJAWs% 2BGDUx% 2B3tAtdSlMHA% 3D (note% 2B);
+            /// Base64 that was encoded and placed in the URL: hSOTxjCJAWs + GDUx + 3tAtdSlMHA = (note the two '+' signs)
+            /// Signature uncoded by C#: hSOTxjCJAWs GDUx 3tAtdSlMHA = (note the blanks space)
+            ///
+            /// Evaluate whether the PHP implementation has this behavior or not and be careful not to refuse valid keys!
+
             var assinaturaOriginal = HttpUtility.UrlDecode(oauth_signature).Replace(' ', '+');
             ViewBag.original = assinaturaOriginal;
             ViewBag.reconstruida = assinaturaReconstruida;
 
             var ok = assinaturaReconstruida == assinaturaOriginal;
 
-            /// Uma vez que a assinatura recriada é validada, os dados transferidos no request podem ser aceitos como válidos,
-            /// porém, você poderá (eu acho que deve!) também avaliar outros itens de segurança, como por ex.:
-            /// 
-            /// Nounce: number generated once time - faz parte da assinatura e você pode armazená-lo até que o tempo de validade 
-            /// do request expire. Só pode ser usado uma vez e sua utilização evita o ataque replay, que é quando o GET é 
-            /// interceptado, ainda é válido, e o hacker tenta usar mais uma vez. Como vc armazenou o nounce, o acesso deve ser 
-            /// recusado.
-            /// 
-            /// Time stamp: utilização óbvia, o request pode ser válido por, por ex., 30 segundos, depois disso, é recusado e 
-            /// o nounce pode ser recusado.
+            /// Once the recreated signature is validated, the data transferred in the request can be accepted as valid,
+            /// however, you can (I think you should!) Also evaluate other security items, such as:
+            ///
+            /// Nounce: number generated once time - is part of the subscription and you can store it until the expiration time
+            /// of the request expire. It can only be used once and its use avoids the replay attack, which is when the GET is
+            /// intercepted, is still valid, and the hacker tries to use it again. Since you stored the nounce, access should be
+            /// refused.
+            ///
+            /// Time stamp: obvious usage, the request can be valid for eg 30 seconds, after which it is refused and
+            /// nounce can be refused.
 
             return View(ok);
         }
@@ -130,16 +126,16 @@ namespace PartnerSKY.Controllers
         /// <returns></returns>
         private string GenerateSignature(Uri url, string consumerKey, string consumerSecret, string token, string tokenSecret, string httpMethod, string timeStamp, string nonce, SignatureTypes signatureType, long usuarioSKY, string nome, string email)//, out string normalizedUrl, out string normalizedRequestParameters)
         {
-            // só implementamos duas formas de assinaturas, plain text (que não usamos) e hmac sha1.
+            // We only implemented two forms of signatures, plain text (that we do not use) and hmac sha1.
             switch (signatureType)
             {
                 case SignatureTypes.PLAINTEXT:
                     return this.UrlEncode(string.Format("{0}&{1}", consumerSecret, tokenSecret));
-                case SignatureTypes.HMACSHA1:  // esta é a que usamos na SKY
-                    // gera a assinatura base
+                case SignatureTypes.HMACSHA1:  // This is the one we use on SKY
+                    // Generates the base signature
                     var signatureBase = GenerateSignatureBase(url, consumerKey, token, tokenSecret, httpMethod, timeStamp, nonce, HMACSHA1SignatureType, usuarioSKY, nome, email);//, out normalizedUrl, out normalizedRequestParameters);
 
-                    // cria o hmac sha1
+                    // Creates the hmac sha1
                     var hmacsha1 = new HMACSHA1
                     {
                         Key =
@@ -150,7 +146,7 @@ namespace PartnerSKY.Controllers
                                                                       : this.UrlEncode(tokenSecret)))
                     };
 
-                    // gera a assinatura base64 usando a assinatura base e o hmac
+                    // Generates base64 signature using base signature and hmac
                     return GenerateSignatureUsingHash(signatureBase, hmacsha1);
                 case SignatureTypes.RSASHA1:
                     throw new NotImplementedException();
@@ -206,9 +202,9 @@ namespace PartnerSKY.Controllers
             parameters.Add(new QueryParameter(OAuthSignatureMethodKey, signatureType));
             parameters.Add(new QueryParameter(OAuthConsumerKeyKey, consumerKey));
             parameters.Add(new QueryParameter(OAuthTokenKey, token));
-            parameters.Add(new QueryParameter(OAuthusUsuarioSKY, usuarioSKY.ToString())); // Parâmetros extras q devem ser incluídos na assinatura base
-            parameters.Add(new QueryParameter(OAuthusUsuarioNome, nome)); // Parâmetros extras q devem ser incluídos na assinatura base
-            parameters.Add(new QueryParameter(OAuthusUsuarioEmail, email)); // Parâmetros extras q devem ser incluídos na assinatura base
+            parameters.Add(new QueryParameter(OAuthusUsuarioSKY, usuarioSKY.ToString())); // Extra parameters to be included in base subscription
+            parameters.Add(new QueryParameter(OAuthusUsuarioNome, nome)); // Extra parameters to be included in base subscription
+            parameters.Add(new QueryParameter(OAuthusUsuarioEmail, email)); // Extra parameters to be included in base subscription
 
             parameters.Sort(new QueryParameterComparer());
 
@@ -288,9 +284,6 @@ namespace PartnerSKY.Controllers
         private string GenerateSignatureUsingHash(string signatureBase, HashAlgorithm hash)
         {
             return ComputeHash(hash, signatureBase);
-            //var hasheada = ComputeHash(hash, signatureBase);
-            //var encodada = HttpUtility.UrlEncode(hasheada);
-            //return encodada;
         }
 
         /// <summary>
